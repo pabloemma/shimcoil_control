@@ -6,6 +6,8 @@ Created on May 3, 2018
 
 import socket
 import sys
+import os
+import subprocess
 from multiprocessing.connection import Client
 class Push(object):
     '''
@@ -27,30 +29,55 @@ class Push(object):
         self.mysocket = socket.socket()  #use default protocol and stream
         # now connect to the server
         self.mysocket.connect((self.raspi_server,self.raspi_port))
+	print ' connected to server'
     def GetSwitch(self):
         '''
 	       here we listen for any changes in the relay switch
 	    if we have one we change its with USBRELAY
 	    '''
-        conn,addr = self.mysocket.accept()
-        print "got connectrion from " , addr
 
             # now we are looping
 
         while True:
-            data = conn.recv(2) 
+            data = self.mysocket.recv(1024) 
             if (len(data)>0): 
                 #print "this is the receiver and I got",data, len(data)
-                print data , " mm"
-                data_int = int(data)
-                if(data_int == 1):
-                    print ' we got a relay of 1 '
-                elif(data_int == 0):
-                    print ' we got a relay of 0 '
+                print data 
+                
+                if(data == 'X'):
+		    print 'Got hangup from server '
+		    
+		    break # finish loop here
+		
+		elif(data == 'R'):
+		    print ' we got read command '
+		    #create a subprocess
+		    pi = subprocess.Popen('usbrelay',stdout=subprocess.PIPE)
+		    relay_output = pi.communicate()[0]
+		    #
+		    
+		    # this will give us two lines
+		    #let's send the back to the server
+		    self.mysocket.send(relay_output)
+		    
+		    #os.system("usbrelay > relay.dat")
+		    #break
+		elif( 'U' in data):
+		
+                    print ' we got a relay of UP ', data
+		    command = data.partition(',')
+                    os.system(command[2])		    
+		    #break
+                elif('D' in data):
+                    print ' we got a relay of DOWN '
+		    command = data.partition(',')
+                    os.system(command[2])		    
+
+		    #break
                 else:
                     print ' invalid setting'
-        conn.send('thanks from raspi')
-	
+		    #break
+	return
 
     def PushData(self,databuffer): 
         '''
@@ -76,11 +103,10 @@ class Push(object):
         self.mysocket.close()
          
 if __name__ == '__main__':
-    ip_server = '169.254.104.3' # change for apporpitae server
+    ip_server = '192.168.24.198' # change for apporpitae server
     server_port = 5478
     
     MyPush = Push(ip_server,server_port)
     MyPush.Connect2Server()
-    #MyPush.PushData('R0430')
     MyPush.GetSwitch()
     MyPush.CloseConnection()        
