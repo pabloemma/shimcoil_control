@@ -20,7 +20,7 @@ class Exchange(object):
     '''
 
 
-    def __init__(self,ip_addr=ip_addr):
+    def __init__(self,ip_addr):
         '''
         Constructor
         '''
@@ -57,6 +57,18 @@ class Exchange(object):
             conn.send('thanks from server')
                 #self.scope.emitter(int(data))
             #conn.close()
+    def PushSwitchRelay(self,status='1'):
+        '''
+        this pushes the relay setting for the USB relay on the raspi
+        when it is triggered it send the value 1 or 0, by default the switch heater is on
+        '''
+        conn,addr = self.mysock.accept() # connection address pair
+        print "got connection form ",addr
+
+        conn.send(status)
+        return
+        
+        
     def CloseAll(self):
         self.mysock.close()
         print ' going away'
@@ -64,9 +76,10 @@ class Exchange(object):
         
             
 if __name__ == '__main__':
-    ip_addr = '204.121.146.110'  #this is the address of the raspi
+    ip_addr = '169.254.104.11'  #this is the address of the raspi
     tel =Exchange(ip_addr)
     tel.Establish()
-    tel.Looping()
+    #tel.Looping()
+    tel.PushSwitchRelay(status='1')
     tel.CloseAll()
  
