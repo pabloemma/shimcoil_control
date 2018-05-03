@@ -28,29 +28,28 @@ class Push(object):
         # now connect to the server
         self.mysocket.connect((self.raspi_server,self.raspi_port))
     def GetSwitch(self):
-    	'''
-	here we listen for any changes in the relay switch
-	if we have one we change its with USBRELAY
-	'''
-	conn,addr = self.mysocket.accept()
-	print "got connectrion from " , addr
+        '''
+	       here we listen for any changes in the relay switch
+	    if we have one we change its with USBRELAY
+	    '''
+        conn,addr = self.mysocket.accept()
+        print "got connectrion from " , addr
 	
 	# now we are looping
 	
-	while True:
-	  data = conn.recv(2) 
-          if (len(data)>0): 
+        while True:
+            data = conn.recv(2) 
+            if (len(data)>0): 
                 #print "this is the receiver and I got",data, len(data)
                 print data , " mm"
-		data_int = int(data)
-		
-		if(data_int == 1):
-		    print ' we got a relay of 1 '
-		elif(data_int == 0):
-		    print ' we got a relay of 0 '
-		else:
-		    print ' invalid setting'
-          conn.send('thanks from raspi')
+                data_int = int(data)
+                if(data_int == 1):
+                    print ' we got a relay of 1 '
+                elif(data_int == 0):
+                    print ' we got a relay of 0 '
+                else:
+                    print ' invalid setting'
+        conn.send('thanks from raspi')
 	
 
     def PushData(self,databuffer): 
