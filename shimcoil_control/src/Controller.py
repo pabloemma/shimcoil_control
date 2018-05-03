@@ -64,8 +64,8 @@ class Exchange(object):
         
             
 if __name__ == '__main__':
-    ip_addr = '204.121.146.110'
-    tel =Exchange()
+    ip_addr = '204.121.146.110'  #this is the address of the raspi
+    tel =Exchange(ip_addr)
     tel.Establish()
     tel.Looping()
     tel.CloseAll()
