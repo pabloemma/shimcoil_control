@@ -34,9 +34,9 @@ class Push(object):
 	    '''
         conn,addr = self.mysocket.accept()
         print "got connectrion from " , addr
-	
-	# now we are looping
-	
+
+            # now we are looping
+
         while True:
             data = conn.recv(2) 
             if (len(data)>0): 
@@ -81,6 +81,6 @@ if __name__ == '__main__':
     
     MyPush = Push(ip_server,server_port)
     MyPush.Connect2Server()
-    MyPush.PushData('R0430')
+    #MyPush.PushData('R0430')
     MyPush.GetSwitch()
     MyPush.CloseConnection()        
