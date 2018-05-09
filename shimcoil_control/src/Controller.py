@@ -45,7 +45,7 @@ class Exchange(object):
         self.mysock.bind(('',myport))
         self.mysock.listen(5) # start listening
         self.conn,self.addr = self.mysock.accept() # connection address pair
-        print "got connection form ",self.addr
+        print "got connection form in establish ",self.addr
 
     def ReadStateRelay(self):
         '''
@@ -61,12 +61,22 @@ class Exchange(object):
             #if not data: break
             if (len(data)>0): 
                 #print "this is the receiver and I got",data, len(data)
-                print data , " mm"
-            self.conn.send('thanks from server')
+                #print data 
+                # lets find the name of the relays
+                relay = data.splitlines() # this gives us a list with name xxx=0
+                # next step is to strip the =0 or =1
+                help1 = relay[0].partition('=')
+                help2 = relay[1].partition('=')
+                self.relay1 = help1[0]
+                self.relay2 = help2[0]
+                print 'the relay names are',self.relay1, self.relay2
+                
+            #self.conn.send('thanks from server')
             break
                 #self.scope.emitter(int(data))
             #conn.close()
-        return 'relay value sent'
+        print'relay value sent'
+        return 
         
         
     def Looping(self):
@@ -76,7 +86,7 @@ class Exchange(object):
 
         while True:
             # wait for data
-            data = conn.recv(1024)
+            data =  self.conn.recv(1024)
             #if not data: break
             if (len(data)>0): 
                 #print "this is the receiver and I got",data, len(data)
@@ -85,20 +95,40 @@ class Exchange(object):
                     fl_data = int(data)
                 else:
                     fl_data = 1
-            conn.send('thanks from server')
+            self.conn.send('thanks from server')
                 #self.scope.emitter(int(data))
             #conn.close()
-    def PushSwitchRelay(self,status='1'):
+    def SetRelay(self,status=None, relay=None):
         '''
         this pushes the relay setting for the USB relay on the raspi
         when it is triggered it send the value 1 or 0, by default the switch heater is on
+        status is either U or D
+        relay = 1 or 2
         '''
-        conn,addr = self.mysock.accept() # connection address pair
-        print "got connection form ",addr
+        data=''
+        if(relay==1):
+            data=self.relay1
+        elif(relay==2):
+            data=self.relay2
+        # form the command
+        if(status == 'U'):
+            command = 'U,usbrelay '+data+'=1'
+        elif(status == 'D'):
+            command = 'D,usbrelay '+data+'=0'
+        else:
+            print 'invalid signal'
+            self.CloseAll()
 
-        conn.send(status)
+        self.conn.send(command)
+  
+
         return
-        
+    def ExitTransfer(self): 
+        self.conn.send('X')
+        self.CloseAll()
+        return
+ 
+          
         
     def CloseAll(self):
         self.mysock.close()
@@ -107,10 +137,14 @@ class Exchange(object):
         
             
 if __name__ == '__main__':
-    ip_addr = '169.254.104.11'  #this is the address of the raspi
+    ip_addr = '192.168.24.199'  #this is the address of the raspi
     tel =Exchange(ip_addr)
     tel.Establish()
     #tel.Looping()
-    tel.PushSwitchRelay(status='1')
+   # tel.PushSwitchRelay(status='1')
+    tel.ReadStateRelay()
+    tel.SetRelay('U',1)
+    #tel.PushSwitchRelay('D') # turn relay off
+    tel.ExitTransfer()
     tel.CloseAll()
  
