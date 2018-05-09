@@ -2,6 +2,13 @@
 Created on May 1, 2018
 
 @author: klein
+
+This is the server
+we communicate to the relay with the follwing commands:
+R: give state of relay
+U: Up turn relay on
+D: Down turn relay off
+
 '''
 
 import socket
@@ -25,6 +32,8 @@ class Exchange(object):
         Constructor
         '''
         self.ip_addr = ip_addr
+        
+    
     def Establish(self):
         '''
         establish connection with Client
@@ -35,13 +44,35 @@ class Exchange(object):
         myport = 5478
         self.mysock.bind(('',myport))
         self.mysock.listen(5) # start listening
+        self.conn,self.addr = self.mysock.accept() # connection address pair
+        print "got connection form ",self.addr
+
+    def ReadStateRelay(self):
+        '''
+        Get the USB real state
+        we send a read character to the client and get the answer back
+        '''
+        self.conn.send('R')
+        
+        # get repsonse
+        while True:
+            # wait for data
+            data = self.conn.recv(1024)
+            #if not data: break
+            if (len(data)>0): 
+                #print "this is the receiver and I got",data, len(data)
+                print data , " mm"
+            self.conn.send('thanks from server')
+            break
+                #self.scope.emitter(int(data))
+            #conn.close()
+        return 'relay value sent'
+        
         
     def Looping(self):
         '''
         Here we listen for the Client
         '''
-        conn,addr = self.mysock.accept() # connection address pair
-        print "got connection form ",addr
 
         while True:
             # wait for data
