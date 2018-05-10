@@ -69,13 +69,15 @@ class Exchange(object):
                 help2 = relay[1].partition('=')
                 self.relay1 = help1[0]
                 self.relay2 = help2[0]
-                print 'the relay names are',self.relay1, self.relay2
+                self.relay1_state = help1[2]
+                self.relay2_state = help2[2]
+#                print 'the relay names are',self.relay1, self.relay2
                 
             #self.conn.send('thanks from server')
             break
                 #self.scope.emitter(int(data))
             #conn.close()
-        print'relay value sent'
+        #print'relay value sent'
         return 
         
         
@@ -131,6 +133,7 @@ class Exchange(object):
           
         
     def CloseAll(self):
+        #self.mysock.shutdown(socket.SHUT_RDWR)
         self.mysock.close()
         print ' going away'
         sys.exit(0)
